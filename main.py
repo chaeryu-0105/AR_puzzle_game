@@ -159,6 +159,7 @@ def check_answer():
         return False
     if all(correct_positions.get(pos) == i for i, pos in placed.items()):
         stage_scores.append(max(0, time_limit - int(time.time() - start_time)))
+        play_sound_async("music/success.mp3")
         current_stage += 1
         if current_stage >= len(stages):
             return True
@@ -302,7 +303,29 @@ while True:
         play_sound_async("music/fail.mp3")
 
     if game_failed:
-        cv2.putText(canvas, "X TIME OVER!", (width // 2 - 150, height + 60), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 255), 3)
+        # 실패 메시지 출력
+        canvas[:, :] = 255  # 화면 전체 흰색으로
+        cv2.putText(canvas, "TIME OVER!", (200, height // 2 - 30), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 5)
+        cv2.putText(canvas, "Press any key to restart", (180, height // 2 + 40), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (50, 50, 50), 3)
+        cv2.imshow("AR Puzzle", canvas)
+        cv2.waitKey(0)
+
+        # 스테이지 초기화 및 시작화면 복귀
+        current_stage = 0
+        stage_scores = []
+        load_next_stage()
+
+        # 시작화면 다시 보여주기
+        start_screen = np.ones((600, 900, 3), dtype=np.uint8) * 255
+        cv2.putText(start_screen, "AR Puzzle Game", (150, 200), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 128, 255), 5)
+        cv2.putText(start_screen, "Press any key to start", (180, 350), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (100, 100, 100), 3)
+        cv2.imshow("AR Puzzle", start_screen)
+        cv2.waitKey(0)
+
+        start_time = time.time()
+        game_failed = False
+        continue  # 다음 프레임으로 루프 재시작
+
 
 
     cv2.imshow("AR Puzzle", canvas)
